@@ -20,9 +20,35 @@ public class Main2Activity extends AppCompatActivity {
         - Feel free to modify the function to suit your program.
     */
 
+    private static final String TAG = "Whack-A-Mole-2.0!";
+    private static final int[] btnIDArray = {R.id.button0,R.id.button1,R.id.button2,R.id.button3,R.id.button4,
+                                            R.id.button5,R.id.button6,R.id.button7,R.id.button8};
+     /*  Stores the 9 buttons IDs here for those who wishes to use array to create all 9 buttons.
+            You may use if you wish to change or remove to suit your codes.*/
+
+    private Button[] buttonList = new Button[btnIDArray.length];
 
 
-    private void readyTimer(){
+
+    //private Button btn0;
+    //private Button btn1;
+    //private Button btn2;
+    //private Button btn3;
+   // private Button btn4;
+   // private Button btn5;
+   // private Button btn6;
+   // private Button btn7;
+  //  private Button btn8;
+      private Button selectedBtn;
+      CountDownTimer timer;
+      CountDownTimer readyTimer;
+      TextView scoreAdvancedText;
+
+      int advancedScore=0;
+
+
+
+    private void readyTimer() {
         /*  HINT:
             The "Get Ready" Timer.
             Log.v(TAG, "Ready CountDown!" + millisUntilFinished/ 1000);
@@ -32,8 +58,25 @@ public class Main2Activity extends AppCompatActivity {
             belongs here.
             This timer countdown from 10 seconds to 0 seconds and stops after "GO!" is shown.
          */
+
+        readyTimer = new CountDownTimer(10000, 1000) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                Toast.makeText(Main2Activity.this, "Get Ready in " + millisUntilFinished / 1000 + "seconds", Toast.LENGTH_SHORT).show();
+                Log.v(TAG, "Ready CountDown!" + millisUntilFinished / 1000);
+
+            }
+            @Override
+            public void onFinish() {
+                Toast.makeText(Main2Activity.this, "GO!", Toast.LENGTH_SHORT).show();
+                Log.v(TAG, "Ready Countdown Complete");
+                readyTimer.cancel();
+                placeMoleTimer();
+            }
+        };
+        readyTimer.start();
     }
-    private void placeMoleTimer(){
+        private void placeMoleTimer(){
         /* HINT:
            Creates new mole location each second.
            Log.v(TAG, "New Mole Location!");
@@ -41,12 +84,21 @@ public class Main2Activity extends AppCompatActivity {
            belongs here.
            This is an infinite countdown timer.
          */
+        timer = new CountDownTimer(Long.MAX_VALUE,1000) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                setNewMole();
+                Log.v(TAG, "New Mole Location!");
+            }
+            @Override
+            public void onFinish() {
+                timer.cancel();
+            }
+        };
+        timer.start();
+
     }
-    private static final int[] BUTTON_IDS = {
-        /* HINT:
-            Stores the 9 buttons IDs here for those who wishes to use array to create all 9 buttons.
-            You may use if you wish to change or remove to suit your codes.*/
-    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         /*Hint:
@@ -58,16 +110,32 @@ public class Main2Activity extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main2);
-
+        scoreAdvancedText = findViewById(R.id.scoreAdvance);
+        Intent intent = getIntent();
+        advancedScore = intent.getIntExtra("score",0);
+        scoreAdvancedText.setText(String.valueOf(advancedScore));
         Log.v(TAG, "Current User Score: " + String.valueOf(advancedScore));
+        readyTimer();
 
 
-        for(final int id : BUTTON_IDS){
+
+        for(int i=0; i<btnIDArray.length;i++){
+            final int index = i;
+            buttonList[i]=(Button)findViewById(btnIDArray[i]);
+            buttonList[i].setText("O");
+            buttonList[i].setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    doCheck(buttonList[index]);
+                }
+            });
+        }
+        //for(final int id : btnIDArray){
             /*  HINT:
             This creates a for loop to populate all 9 buttons with listeners.
             You may use if you wish to remove or change to suit your codes.
             */
-        }
+       // }
     }
     @Override
     protected void onStart(){
@@ -81,6 +149,15 @@ public class Main2Activity extends AppCompatActivity {
             Log.v(TAG, "Missed, point deducted!");
             belongs here.
         */
+        if (checkButton.getText()=="*"){
+            advancedScore+=1;
+            Log.v(TAG, "Hit, score added!");
+        }
+        else{
+            advancedScore-=1;
+            Log.v(TAG, "Missed, point deducted!");
+        }
+        scoreAdvancedText.setText(String.valueOf(advancedScore));
     }
 
     public void setNewMole()
@@ -91,6 +168,10 @@ public class Main2Activity extends AppCompatActivity {
          */
         Random ran = new Random();
         int randomLocation = ran.nextInt(9);
+        for (Button i :buttonList){
+            i.setText("O");
+        }
+        buttonList[randomLocation].setText("*");
     }
 }
 
